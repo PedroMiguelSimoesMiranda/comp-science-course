@@ -1,0 +1,50 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="pt">
+<head>
+
+  
+<meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="-1">
+    <meta http-equiv="cache-control" content="no-store">
+  <link href="fanzone.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+
+<div id="titulo">
+<h1>FanZone</h1>
+
+</div>
+
+<div id="cmenu"> 
+<a href="login.jsp">Login</a>&nbsp;|&nbsp;
+</div>
+
+<div id="main">
+<% String error = (String)session.getAttribute( "error");
+String errorCustom = (String)session.getAttribute( "error-custom");
+session.setAttribute( "error", null);
+session.setAttribute( "error-custom", null);
+if( error != null && error.length() > 0) {
+	out.println("<p><font color =\"red\">ERROR:&nbsp;" + error + "</font></p><br>");
+}
+if( errorCustom != null && errorCustom.length() > 0) {
+	out.println("<p><b>ERROR:&nbsp;" + errorCustom + "</b></p><br>");
+}
+
+%>
+<p>Aplica&ccedil;&atilde;o de partilha de fotografias com colegas.</p>
+<p>Funcionalidades:</p>
+<ul>
+  <li>cria&ccedil;&atilde;o de comunidades para partilha de fotografias</li>
+  <li>&aacute;lbuns incluindo fotografias de v&aacute;rios utilizadores</li>
+  <li>pesquisa dentro de comunicades</li>
+  <li>obten&ccedil;ao de c&oacute;pias de fotografias</li>
+</ul>
+<p>Apenas pode usar a aplica&ccedil;&atilde;o a partir de endere�os locais.</p>
+
+
+</div>
+
+</body>
+</html>
