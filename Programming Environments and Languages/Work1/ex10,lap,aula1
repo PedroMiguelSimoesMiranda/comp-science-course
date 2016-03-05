@@ -1,0 +1,18 @@
+char curr;
+curr = getchar();
+while (curr != EOF){
+
+if curr == 'f' then(
+	curr = getchar();
+	if curr == 'o' then(
+		curr = getchar();
+		if curr == 'o' then return "ACCEPT";))
+
+if curr == 'b' then(
+	curr = getchar();
+	if curr == 'a' then (
+		curr = getchar();
+		if curr == 'r' then return "ACCEPT";))
+
+}
+return "REJECT";

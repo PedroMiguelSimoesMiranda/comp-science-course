@@ -1,0 +1,12 @@
+//exercicio 1
+
+global quadrado
+section .text
+quadrado:
+     push ebp
+     mov ebp,esp
+     mov eax, [ebp+8]
+     mul eax
+     pop ebp
+     ret
+

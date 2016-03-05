@@ -1,0 +1,7 @@
+Contactos:  bi, telefone
+Formatos: cod_produto, formato
+Legendagem: cod_produto, legendagem
+Genero: cod_produto, genero
+
+Multas:cod_aluguer,num_cliente,dataM //eliminar faltas_pagamento
+Pagamentos_multas:cod_aluguer,num_cliente,dataP

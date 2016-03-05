@@ -1,0 +1,253 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html;charset='ISO-8859-1'" />
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+<script type="text/javascript">
+
+
+
+/*
+Trabalho realizado por : Ricardo Torres N.º 28254
+			 Nuno Delgado   N.º 28455
+						 
+Comentário Inicial
+						 
+Para finalizarmos o trabalho de modo a podermos ter
+a cotação máxima, efectuámos uma função simples mas interessante, que calcula
+a distância entre duas posições do mapa, dadas as suas latitudes e longitudes.
+Como utilizar:
+------------------------------------------------
+1. Selecionar duas posições na caixa de selecção
+2. Clicar no botão para calcular a distância
+3. A resposta aparece numa janela de alerta, sendo 
+a distância apresentada em kilometros
+------------------------------------------------
+É de notar, que esta distância é meramente matemática, 
+não tendo em conta a possibilidade de o caminho não ser possivel
+de realizar (não podermos atravessar prédios por exemplo).
+
+Não implementámos uma função mais avançada, por falta de tempo,
+devido à proximidade da data de entrega do trabalho com um teste.
+
+Não houve nenhuma grande dificuldade para realizar este trabalho, 
+a dificuldade esteve apenas no desconhecimento da API do google maps.
+
+Colocámos os nossos nomes no cabeçalho da página.
+*/
+
+// Globals
+var map, markers, textf, selectf, optionsf ;
+
+// Auxiliary functions
+function Belongs(val, arr) {
+    for( i = 0 ; i < arr.length; i++ )
+        if( printPoint(arr[i].position) == printPoint(val) )
+            return true ;
+    return false ;
+}
+
+/*Função que adiciona um marcador ao mapa*/
+function add(){
+	var t = formf.textf.value;
+	var p = t.indexOf(", ");
+	var c1 = parseFloat(t.substr(0,p));
+	var c2 = parseFloat(t.substr(p+1,t.length-1));
+	
+	if(!isNaN(c1) && !isNaN(c2)){
+		var pos = new google.maps.LatLng(c1, c2);
+		if(! Belongs(pos,markers)){
+			var marcador =new google.maps.Marker({position: pos, map: map, title: printPoint(pos)});
+			markers.push(marcador);
+			//markers[markers.length - 1].setMap(map);
+			optionsf[optionsf.length] = new Option(printPoint(pos));
+			map.setCenter(pos);
+			
+		}
+		else { 
+			alert("Already there");
+			}
+	}
+	else { 
+		alert("Invalid coordinates");
+		}
+	
+}	
+
+/*Função que remove um conjunto de marcadores do mapa*/
+function remove(){
+	for(i=selectf.length-1;i>=0;i--){	
+	if(optionsf[i].selected){
+			for(j=0;j< markers.length;j++){
+				if(printPoint(markers[j].position)==selectf[i].text){
+					markers[j].setMap(null);
+					markers.splice(j,1);
+				}
+			}
+			selectf.remove(i);
+		}
+	}
+} 
+
+
+// Interface functions
+function RunFormF(op) {
+    switch(op){
+	case 'a':
+		add();
+		break;
+	case 'r':
+		remove();
+		break;
+	default:
+		break;
+	}
+}
+/*Função chamada para calcular a distância entre duas posições*/
+function calldist()
+{
+	if(countselected())
+	{
+	var indexlat=0;
+	var indexlng=0;
+	var lngs = [];
+	var lats = [];
+	for(i=selectf.length-1;i>=0;i--){	
+	if(optionsf[i].selected){
+			for(j=0;j< markers.length;j++){
+				if(printPoint(markers[j].position)==selectf[i].text){
+					lngs[indexlng++]=markers[j].position.lng();
+					lats[indexlat++]=markers[j].position.lat();
+				}
+			}
+		}
+	}
+	var lat1 = lats[0];
+	var lat2 = lats[1];
+	var lng1 = lngs[0];
+	var lng2 = lngs[1];
+	alert (" A distância entre os dois pontos é de:\n" +distancia(lat1,lng1,lat2,lng2, "K") + " Km");
+	}
+	
+	
+}
+ /*Conta o número de posições seleccionadas. 
+ É utilizada como auxiliar à função "calldist".*/
+function countselected()
+{
+counter=0;
+	for(i=optionsf.length-1;i>=0;i--){	
+		if(optionsf[i].selected)
+		{
+			counter++;
+		}
+	}
+if(counter >2)
+{
+	alert("A função só aceita 2 argumentos");
+	return false;
+	}
+if(counter <2)
+{
+	alert("Falta(m): "+(2-counter)+" argumento(s)");
+	return false;
+}
+else
+	return true;
+}
+
+/*Imprime um ponto sob a forma de string*/
+function printPoint(pos){
+return pos.lat()+", "+pos.lng();
+}
+
+/*Função que efectua os cálculos necessários para calcular a distância 
+entre dois pontos*/
+function distancia(lat1, lon1, lat2, lon2, unit) {
+  var theta = lon1 - lon2;
+  var dist = Math.sin(deg2rad(lat1)) * Math.sin(deg2rad(lat2)) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.cos(deg2rad(theta));
+  dist = Math.acos(dist);
+  dist = rad2deg(dist);
+  dist = dist * 60 * 1.1515;
+  if (unit == "K") {
+    dist = dist * 1.609344;
+  } else if (unit == "N") {
+  	dist = dist * 0.8684;
+    }
+  return (dist);
+}
+
+/*Converte graus em radianos*/
+function deg2rad(deg) {
+  return (deg * Math.PI / 180.0);
+}
+
+/*Converte radianos em graus*/
+function rad2deg(rad) {
+  return (rad * 180.0 / Math.PI);
+}
+
+function Initialize() {
+	
+// Init globals
+    markers = [] ;
+    textf = document.forms['formf'].elements['textf'] ;
+    selectf = document.forms['formf'].elements['selectf'] ;
+    optionsf = selectf.options ;
+// Create map
+    var center = new google.maps.LatLng(38.660998431780286, -9.204448037385937) ;
+    var mapOptions = {
+        zoom: 12,
+        center: center,
+        mapTypeId: google.maps.MapTypeId.SATELLITE
+    };
+    map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
+// Install map listeners
+    google.maps.event.addListener(map, 'click', function(event) {
+        point = event.latLng.toString();
+		textf.value = point.substr(1, point.length-2);
+    });
+    google.maps.event.addListener(map, 'rightclick', function(event) {
+        point = event.latLng.toString();
+		textf.value = point.substr(1, point.length-2);
+		RunFormF('a');
+    });
+// Add first placemark in the center
+    markers.push(new google.maps.Marker({position: center, map: map, title: printPoint(center)}));
+    markers[markers.length - 1].setMap(map);
+    map.setCenter(center);
+    optionsf[optionsf.length] = new Option(printPoint(center));
+}
+
+
+</script>
+</head>
+
+<body onload="Initialize()">
+
+<table border=1><tr>
+<td  valign="top">
+  <H1>Google Maps Tool</H1>
+  <font size="-1">Trabalho Realizado por: <b>Nuno Delgado & Ricardo Torres</b></font>
+  <form NAME="formf">
+    <INPUT TYPE="text" NAME="textf" VALUE="38.660998431780286, -9.204448037385937"
+                                    style="{width:350px;text-align:right}" />
+    <br /><center>
+      <input type="button" name="button1" value="Add" onclick="RunFormF('a')" />
+      <input type="button" name="button2" value="Remove" onclick="RunFormF('r')" />
+	  <input type="button" name="button1" value="Calculate Distance" onclick="calldist()" />
+    </center>
+    <select id="selectf" size="20" multiple="multiple" 
+                                   style="width:350px;margin:5px 0 5px 0;" />
+  </form>
+  
+</td>
+
+<td>
+  <div id="map_canvas" style="width:800; height:600"></div>
+</td>
+</tr></table> 
+
+</body>
+</html>

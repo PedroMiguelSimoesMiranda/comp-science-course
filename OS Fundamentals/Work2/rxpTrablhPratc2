@@ -1,0 +1,41 @@
+1. Quantas threads são criadas pelo programa?
+	2
+2. No máximo, quantas threads podem estar ao mesmo tempo em execução?
+	2
+
+3. Qual o resultado esperado para um número N, dado como argumento ao programa?
+	2N
+
+
+
+Regiões críticas
+1. Identifique todas as variáveis que são partilhadas entre as várias threads do programa.
+	São as varáveis globais: num e niter.
+
+2. Isole o pedaço de código mais pequeno possível que deve ser executado em exclusão mútua
+para o programa produzir os resultados correctos. Esta será a sua região crítica.
+
+		num++;  
+
+
+             |--> inc[num]
+num=num+1; ->|
+             |--> mov eax, [num]
+                 inc eax
+		 mov [num], eax
+
+escrever gcc -S teste.c 
+para ver o codigo assembly
+
+
+
+
+3. Usando os mecanismos para garantia de exclusão mútua das pthreads (mutexes) corrija o programa
+de forma obter os resultados correctos.
+
+
+
+4. Teste o seu programa com diferentes valores.
+
+Relatório
+Ao diminuir a região crítica vamos ter um maior paralelismo entre as threads, mas isto nem sempre afecta a velocidade, pois podemos estar a excluir da região crítica operações como chamadas ao sistema que consomem muito tempo ao CPU.

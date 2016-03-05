@@ -1,0 +1,7 @@
+void send_serial(unsigned char b){
+	do{
+		unsigned char c= inByte(0x3f8 + 5);
+		c=c & 0x20; // bit 5 de LSR registo THR
+	}while(c==0)
+	outByte(0x3f8,b);
+}

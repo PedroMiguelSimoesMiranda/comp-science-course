@@ -1,0 +1,179 @@
+<!-   Projecto 4 LAP          ->
+<!-   Eduarto Duarte nº 25216 ->
+<!-   Pedro Miranda  nº 28289 ->
+
+<!-   Extras ->
+
+<!-   Dar nomes aos marcadores inseridos ->
+<!-   Quando o nome já existe, ele altera o nome acrescentando um 2 no fim ->
+<!-   Se o nome já tem um número no final, esse número é incrementado. ->
+
+<!-   Duplo click no marcador, dentro da lista ->
+<!-   O mapa é centrado para o marcador que recebeu um duplo click ->
+
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html;charset='ISO-8859-1'" />
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+<script type="text/javascript">
+
+// Globals
+var map, markers, textf, selectf, optionsf ;
+
+// Auxiliary functions
+// Verifica se as coordenadas já existem na lista de marcadores
+function Belongs(val, arr) {
+    for( i = 0 ; i < arr.length ; i++ ){
+		if( arr[i].value == val )
+            return true ;
+	}
+    return false ;
+}
+// Verifica se o nome já existem na lista de marcadores
+function BelongsName(val, arr) {
+    for( i = 0 ; i < arr.length ; i++ ){
+		if( arr[i].text == val )
+            return true ;
+	}
+    return false ;
+}
+
+// Interface functions
+function RunFormF(op) {
+    // Adicionar um marcador novo
+	if(op == 'a'){
+		var coords = textf.value.replace(/ /g,'');
+		var arg = coords.split(',');
+		if(isFinite(arg[0]) && isFinite(arg[1]) && arg[2] == null){
+			if(!Belongs(coords,optionsf)){
+				if(!BelongsName(namef.value,optionsf)){
+					optionsf[optionsf.length] = new Option(namef.value, coords);
+					
+					myLatlng = new google.maps.LatLng(arg[0],arg[1]);
+					map.setCenter(myLatlng);
+					markers.push( new google.maps.Marker({
+						position: myLatlng, 
+						map: map,
+						title: namef.value
+					}));
+				}else{
+					//alert('Name already in use');
+					var name = namef.value;
+					var num = -1;
+					if(isFinite(name[name.length-1])){
+					
+						while(isFinite(name[name.length-1])){
+							if(num == -1)
+								num = name[name.length-1];
+							else
+								num = name[name.length-1] + num;
+							name = name.substring(0, name.length-1);
+						}
+						
+						num++;
+						namef.value = name + num;
+					}else{
+						namef.value = namef.value + 2;
+					}
+					RunFormF('a');
+				}
+			}else
+				alert('Already there');
+		}else
+			alert('Invalid coordinates');
+	}
+	// Remover marcadores selecionados
+	else if(op == 'r'){
+		for(j=selectf.length-1;j>=0;j--)
+			if(Belongs(selectf[j].value,optionsf))
+			for(i=0;i<optionsf.length;i++)
+				if(optionsf[i].value==selectf.value){
+					markers[i].setMap(null);
+					markers.splice(i,1);
+					selectf.remove(i);
+					break;
+				}
+	}
+	// Centrar mapa para o marcador selecionado
+	else if(op == 'g'){
+		var arg = selectf.value.split(',');
+		myLatlng = new google.maps.LatLng(arg[0],arg[1]);
+		map.setCenter(myLatlng);
+		map.setZoom(12);
+	}
+}
+
+// mais funções TODO
+
+function Initialize() {
+// Init globals
+    markers = [] ;
+    textf = document.forms['formf'].elements['textf'] ;
+    selectf = document.forms['formf'].elements['selectf'] ;
+    optionsf = selectf.options ;
+	
+	namef = document.forms['formf'].elements['namef'] ;
+// Create map
+    var center = new google.maps.LatLng(38.660998431780286, -9.204448037385937) ;
+    var mapOptions = {
+        zoom: 12,
+        center: center,
+        mapTypeId: google.maps.MapTypeId.SATELLITE
+    };
+    map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
+// Install map listeners
+    google.maps.event.addListener(map, 'click', function(event) {
+        // Done
+		textf.value = event.latLng.lat() +', '+event.latLng.lng();
+    });
+    google.maps.event.addListener(map, 'rightclick', function(event) {
+        // Done
+		textf.value = event.latLng.lat() +', '+event.latLng.lng();
+		RunFormF('a');
+    });
+// Add first placemark in the center
+    // Done
+	RunFormF('a');
+}
+</script>
+</head>
+
+<body onload="Initialize()">
+
+<table border=1><tr>
+<td  valign="top">
+  <H1>Google Maps Tool</H1>
+  <form NAME="formf">
+    <INPUT TYPE="text" NAME="textf" VALUE="38.660998431780286, -9.204448037385937"
+                                    style="{width:270px;text-align:right}" />
+	<br />
+	<INPUT TYPE="text" NAME="namef" VALUE="FCT"
+                                    style="{width:270px;text-align:center}" />
+    <br /><center>
+      <input type="button" name="button1" value="Add" onclick="RunFormF('a')" />
+      <input type="button" name="button2" value="Remove" onclick="RunFormF('r')" />
+    </center>
+    <select id="selectf" size="20" multiple="multiple" 
+                                   style="width:270px;margin:5px 0 5px 0;" ondblclick="RunFormF('g')"></select> 
+	<br /> Eduardo Duarte 25216
+	<br /> Pedro Miranda  28289
+	<br /> ---------------------------------------------
+	<br /> Map Options:
+	<br /> Left Click  -> Set Coordinates
+	<br /> Right Click -> Place Marker
+	<br /> ---------------------------------------------
+	<br /> List Options:
+	<br /> Double Left Click -> Goto Marker Location
+  </form> 
+</td>
+
+<td>
+  <div id="map_canvas" style="width:800; height:600"></div>
+</td>
+
+</tr></table>
+
+</body>
+</html>

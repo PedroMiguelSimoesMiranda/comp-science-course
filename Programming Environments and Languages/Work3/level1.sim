@@ -1,0 +1,56 @@
+    LD -1
+    CAL 4
+
+    LOC 1    ; start
+    LD 4
+    LD 0
+    LD 3
+    LDA
+    STV
+    LD -1
+    CAL 55
+    HALT
+
+    LOC 0    ; fact
+    LD 0
+    LD -1
+    LDA
+    LDV
+    BRF 51
+    LD 0
+    LD -1
+    LDA
+    LDV
+    LD 1
+    LD 0
+    LD -1
+    LDA
+    LDV
+    SUB
+    LD 0
+    CAL 19
+    MUL
+    RET 1
+    LD 1
+    RET 1
+
+    LOC 1    ; main
+    LD 5
+    LD 0
+    LD 3
+    LDA
+    STV
+    LD 1
+    LD 3
+    LDA
+    LDV
+    LD 0
+    LD 3
+    LDA
+    LDV
+    LD 0
+    CAL 19
+    ADD
+    WR
+    LD 0
+    RET 1

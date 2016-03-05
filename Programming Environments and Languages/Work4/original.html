@@ -1,0 +1,135 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html;charset='ISO-8859-1'" />
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+<script type="text/javascript">
+
+// Globals
+var map, markers, textf, selectf, optionsf ;
+
+// Auxiliary functions
+function Belongs(val, arr) {
+    for( i = 0 ; i < arr.length ; i++ )
+        if( arr[i].value == val )
+            return true ;
+    return false ;
+}
+
+function ConvertToCoord(text){
+	var coord,lat,lng,separator;
+	
+	separator = text.indexOf(",");
+	counter=separator;
+	lat = parseFloat(text.substr(0,separator));
+	lng = parseFloat(text.substr(separator+1,text.length-1));
+
+		if(!IsNaN(str1) ||!IsNaN(str2)){
+			coord = new google.maps.LatLng(lat,lng);
+		}
+		else alert("Invalid coordinates");
+return coord;
+}
+
+function ConvertToText(latLong){
+	var lat,lng;
+	lat=latLong.lat();
+	lng=latLong.lng();
+return lat + ", " + lng;
+}
+
+
+function AddPlaceMark(text){ alert("1");
+	var myLatLng = ConvertToCoord(text);alert("2");
+	var newMarker=new google.maps.Marker({
+			position: myLatLng,
+			map: map,
+			});
+			alert("2");
+		if(!Belongs(newMarker,markers)){
+		alert("3");
+			markers.splice(counter,0,newmarker);
+			optionsf[optionsf.length] = new Option(myLatLng.lat(), myLatLng.lng()) 
+			var mapOptions = {zoom: 12,
+			center: myMatLng,
+			mapTypeId: google.maps.MapTypeId.SATELLITE};
+			map.setCenter(myLatLng);
+			alert("added");
+		}
+		else
+			alert("Already there");	
+}
+
+
+// Interface functions
+function RunFormF(op) {
+    // TODO
+	if(op=='a'){
+	counter++;
+	AddPlaceMark(ConverToCoord(form.text.value));
+	document.formf.elements[counter]=formf.text.value;
+	}
+	if(op=='r'){
+		counter--;
+		removeMark(form.text.value);
+		
+	}
+}
+
+
+// mais funções TODO
+
+function Initialize() {
+// Init globals
+    markers = [] ;
+    textf = document.forms['formf'].elements['textf'] ;
+    selectf = document.forms['formf'].elements['selectf'] ;
+    optionsf = selectf.options ;
+// Create map
+    var center = new google.maps.LatLng(38.660998431780286, -9.204448037385937) ;
+    var mapOptions = {
+        zoom: 12,
+        center: center,
+        mapTypeId: google.maps.MapTypeId.SATELLITE
+    };
+    map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
+// Install map listeners
+    google.maps.event.addListener(map, 'click', function(event) {
+        // TODO
+    });
+    google.maps.event.addListener(map, 'rightclick', function(event) {
+        // TODO
+    });
+// Add first placemark in the center
+    // TODO
+	
+	AddPlaceMark(center);
+}
+</script>
+</head>
+
+<body onload="Initialize()">
+
+<table border=1><tr>
+<td  valign="top">
+  <H1>Google Maps Tool</H1>
+  <form NAME="formf">
+    <INPUT TYPE="text" NAME="textf" VALUE="38.660998431780286, -9.204448037385937"
+                                    style="{width:270px;text-align:right}" />
+    <br /><center>
+      <input type="button" name="button1" value="Add" onclick="RunFormF('a')" />
+      <input type="button" name="button2" value="Remove" onclick="RunFormF('r')" />
+    </center>
+    <select id="selectf" size="20" multiple="multiple" 
+                                   style="width:270px;margin:5px 0 5px 0;" />
+  </form>
+</td>
+
+<td>
+  <div id="map_canvas" style="width:800; height:600"></div>
+</td>
+</tr></table> 
+
+</body>
+</html>

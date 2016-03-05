@@ -1,0 +1,159 @@
+drop table Pessoas cascade constraints;
+create table Pessoas(
+bi number(8) not null,
+sexo char(1) not null CHECK ( sexo IN ( 'F' , 'M' )  ), 
+nome varchar2(40) not null,
+primary key (bi)
+);
+
+/*------------------------------------------------------------*/
+drop table Clientes cascade constraints;
+create table Clientes(
+faltas_pagamento number(3),
+num_cliente number(5) not null,
+bi number(8) not null,
+primary key(bi),
+foreign key (bi) references Pessoas);
+
+/*------------------------------------------------------------*/
+drop table Empregados cascade constraints;
+create table Empregados(
+faltas number(3), 
+num_Empregado number(2)not null,
+bi number(8) not null,
+primary key(num_Empregado),
+foreign key (bi) references Pessoas);
+
+/*------------------------------------------------------------*/
+drop table Fornecedores cascade constraints;
+create table Fornecedores(
+num_Fornecedor number(1) not null,
+firma varchar2(40)not null,
+bi number(8) not null,
+primary key(bi),
+foreign key (bi) references Pessoas);
+
+/*------------------------------------------------------------*/
+drop table Alugueres cascade constraints;
+create table Alugueres(
+data_Aluguer date not null,
+data_Entrega date not null,
+data_Limite date not null,
+preco_Aluguer number(3) not null,
+bi number(8) not null,
+foreign key (bi) references Clientes,
+primary key(data_Aluguer)
+
+);
+
+/*------------------------------------------------------------*/
+drop table Postos cascade constraints;
+
+create table Postos(
+horas_Extra number(3),
+posto varchar2(30) not null CHECK  (posto IN ('Gerente','Balcao', 'Limpeza'),
+turno varchar2(5) not null CHECK (turno IN ('Noite', 'Dia'),
+salario number(3) not null,
+data_Inicio date not null,
+num_Empregado number(2)not null,
+primary key(posto),
+foreign key(num_Empregado) references Empregados);
+
+/*------------------------------------------------------------*/
+drop table Produtos cascade constraints;
+create table Produtos(
+cod_produto number(5),
+nomeP varchar2(50) not null,
+
+ano date not null,
+idade_minima number(2)not null,
+produtora varchar(50) not null,
+primary key(cod_produto));
+
+/*------------------------------------------------------------*/
+drop table Filmes cascade constraints;
+create table Filmes(
+cod_produto number(5) not null,
+Realizador varchar (50) not null,
+foreign Key (cod_produto) references Produtos);
+/*------------------------------------------------------------*/
+
+drop table Stock cascade constraints;
+create table Stock(
+cod_produto number(5) not null,
+quantidade number(2)not null,
+preco number (10) not null,
+foreign key (cod_produto) references Produtos,
+primary key(cod_produto));
+
+/*------------------------------------------------------------*/
+drop table Jogos cascade constraints;
+create table Jogos(
+cod_produto number(5) not null,
+requisitos varchar2(100) not null,
+foreign Key (cod_produto) references Produtos);
+/*------------------------------------------------------------*/
+
+drop table fornecedores_encomendas;
+create table fornecedores_encomendas(
+bi  number(8) not null,
+cod_encomenda number(6)not null,
+primary key(bi,cod_encomenda),
+foreign key(bi) references Fornecedores,
+foreign key(cod_encomenda) references Encomendas);
+
+/*------------------------------------------------------------*/
+drop table Encomendas cascade constraints;
+create table Encomendas(
+cod_encomenda number(6)not null,
+data_entrega date not null,
+quantidade number(2) not null,
+data_encomenda date,
+primary key(cod_encomenda));
+
+/*-------------------------------------------------------------*/
+drop table Contactos cascade constraints
+create table Contactos(
+bi number(8) not null,
+contacto number(9) not null,
+foreign key(bi) references Pessoas);
+
+/*-------------------------------------------------------------*/
+drop table Formatos cascade constraints
+create table Formatos(
+formato varchar2(10) not null CHECK ( formato IN('HDVD','VHS','DVD','BLU-RAY')),
+foreign key (cod_produto) references Produtos);
+
+/*-------------------------------------------------------------*/
+drop table Generos cascade constraints
+create table Generos(
+genero varchar2(50) not null,
+foreign key (cod_produto) references Produtos);
+
+/*-------------------------------------------------------------*/
+drop table Legendagens cascade constraints
+create table Legendagens(
+legendagem varchar2(30) not null,
+foreign key (cod_produto) references Produtos);
+
+/*-------------------------------------------------------------*/
+drop table Multas cascade constraints
+create table Multas(
+cod_aluguer number(5) not null,
+num_cliente number(5) not null,
+dataM date not null,
+foreign key (cod_aluguer) references Alugueres
+foreign key (num_cliente) references Clientes);
+
+/*-------------------------------------------------------------*/
+drop table Pagamentos_Multa cascade constraints
+create table Pagamentos_Multa(
+cod_aluguer number(5) not null,
+num_cliente number(5) not null,
+dataP date not null,
+foreign key (cod_aluguer) references Alugueres
+foreign key (num_cliente) references Clientes);
+
+/*-------------------------------------------------------------*/
+
+

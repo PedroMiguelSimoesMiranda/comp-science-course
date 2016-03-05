@@ -1,0 +1,275 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define STACK_SIZE   20000
+#define CODE_SIZE	20000
+#define HEAP_SIZE	20000
+ 
+typedef unsigned Word;
+typedef unsigned Addr;
+
+Word data[HEAP_SIZE+STACK_SIZE];
+Word code[CODE_SIZE];
+
+Addr SP = HEAP_SIZE+STACK_SIZE; // Stack pointer
+Addr FP = HEAP_SIZE+STACK_SIZE; // Frame pointer
+Addr PC = 0; // Program counter
+
+Addr HP = 0;; // HeapPointer
+
+#define PUSH(v)		(data[--SP] = (Word)(v))
+#define POP()		(data[SP++])
+#define OFFSET(a,o)	((a)-(o))
+
+#define DL(fp)		(data[fp])
+#define SL(fp)		(data[fp-1])
+#define PC(fp)		(data[fp-2])
+
+#define X_NOP  0x0000
+#define X_HALT 0x00FF
+#define X_ADD  0x0001
+#define X_LD   0x0002  // One extra argument in the code segment
+#define X_BR   0x0003
+#define X_SUB  0x0004
+#define X_MUL  0x0005
+#define X_DIV  0x0006
+#define X_AND  0x0007
+#define X_OR   0x0008
+#define X_EQ   0x0009
+#define X_GT   0x000A
+#define X_NOT  0x000B
+#define X_BRF  0x000C  // One extra argument in the code segment
+#define X_CAL  0x000D  // One extra arguments in the code segment
+#define X_RET  0x000E
+#define X_LOC  0x000F
+#define X_STV  0x0011
+#define X_LDV  0x0010
+#define X_LDA  0x0012
+#define X_ALL  0x0013
+#define X_FRE  0x0014
+
+void PushConst(Word c) {
+	PUSH(c); // push a constant into the stack
+}
+
+void Add(void) {
+	Word arg1 = POP(); // pop the first argument
+	Word arg2 = POP(); // pop the second argument
+	PUSH(arg1 + arg2); // push the result
+}
+
+void LoadVarAddr(int nesting, int offset) {
+	Addr addr;
+	for (addr = FP; nesting--; addr = (Addr) SL(addr))
+		; // find the frame of the var
+	PUSH(OFFSET(addr,offset)); // push the var address
+}
+
+void Value() {
+	Addr pt = POP(); // pop the var address
+	PUSH(data[pt]); // push the value of the variable
+}
+
+void Assign() {
+	Addr pt = POP(); // pop the var address
+	Addr value = POP(); // pop the value to store
+	data[pt] = value; // do the assignement
+}
+
+void Call(int nesting, Addr addr) {
+	PUSH(FP); // push dynamic link
+	if (nesting == -1)
+		PUSH(FP); // push static link
+	else {
+		Addr pt;
+		for (pt = FP; nesting--; pt = (Addr) SL(pt))
+			; // find the frame of the called function
+		PUSH(SL(pt)); // push static link
+	}
+	PUSH(PC); // push return address
+	PC = addr; // jump to the function
+}
+
+void Enter(int locSpace) {
+	FP = SP + 2; // FP points to the dynamic link inside the frame
+	SP -= locSpace;
+}
+
+void Exit(int argSpace) {
+	Word res = POP(); // save the result here
+	SP = FP + argSpace; // discard the entire frame, including the arguments
+	PC = PC(FP); // restore the program counter
+	FP = DL(FP); // restore the previous frame pointer
+	PUSH(res); // push the result
+}
+
+//Here
+void Sub(void) {
+	Word arg1 = POP(); // pop the first argument
+	Word arg2 = POP(); // pop the second argument
+	PUSH(arg1 - arg2); // push the result
+}
+
+void Mult(void) {
+	Word arg1 = POP(); // pop the first argument
+	Word arg2 = POP(); // pop the second argument
+	PUSH(arg1 * arg2); // push the result
+}
+
+void Div(void) {
+	Word arg1 = POP(); // pop the first argument
+	Word arg2 = POP(); // pop the second argument
+	PUSH(arg1 / arg2); // push the result
+}
+
+void And(void) {
+	Word arg1 = POP(); // pop the first argument
+	Word arg2 = POP(); // pop the second argument
+	PUSH(arg1 && arg2); // push the result
+}
+
+void Or(void) {
+	Word arg1 = POP(); // pop the first argument
+	Word arg2 = POP(); // pop the second argument
+	PUSH(arg1 || arg2); // push the result
+}
+
+void Equals(void) {
+	Word arg1 = POP(); // pop the first argument
+	Word arg2 = POP(); // pop the second argument
+	PUSH(arg1 == arg2); // push the result
+}
+
+void GreaterThen(void) {
+	Word arg1 = POP(); // pop the first argument
+	Word arg2 = POP(); // pop the second argument
+	PUSH(arg1 > arg2); // push the result
+}
+
+void Not(void) {
+	Word arg1 = POP(); // pop the first argument
+	PUSH(!arg1); // push the result
+}
+
+void Loc(void) {
+	Word num = code[PC+1];
+	Enter(num);
+	int i;
+	for(i=1;i<num+1;i++)
+		data[SP+i] = 0;
+	PC++;
+}
+
+void Alloc(void) {
+	int size = POP();
+	int done = 1;
+	int curr = HP;
+
+	if(HP != 0)
+		while(done){
+			if(data[curr]-size > 1){
+				done = 0;
+				data[curr+1+size] = data[curr]-size;
+				HP = data[curr+1];
+				data[curr] = size;
+				PUSH(curr);
+			}
+			else
+				curr = data[curr];
+		}
+	else{
+		data[curr+1+size] = data[curr]-size;
+		HP = curr+1+size;
+		data[curr] = size;
+		PUSH(curr);
+	}
+}
+
+void Free(void) {
+	int addr = POP();
+	data[addr+1] = HP;
+	HP = addr;
+}
+
+//\Here
+void Run() {
+	for (;;) {
+	  switch (code[PC++]) {
+		case X_NOP:
+			break;
+		case X_ADD:
+			Add();
+			break;
+		case X_LD:
+			PushConst(code[PC++]);
+			break;
+		case X_BR:
+			PC = code[PC];
+			break;
+		case X_HALT:
+			printf("HALT\n");
+			return;
+//Here
+		case X_SUB:
+			Sub();
+			break;
+		case X_MUL:
+			Mult();
+			break;
+		case X_DIV:
+			Div();
+			break;
+		case X_AND:
+			And();
+			break;
+		case X_OR:
+			Or();
+			break;
+		case X_EQ:
+			Equals();
+			break;
+		case X_GT:
+			GreaterThen();
+			break;
+		case X_NOT:
+			Not();
+			break;
+		case X_BRF:
+			if(POP()==0)
+				PC = code[PC];
+			else
+				PC++;
+			break;
+		case X_LDA:
+			printf("LDA\n");
+			LoadVarAddr(POP(),POP());
+			break;
+		case X_LDV:
+			Value();
+			break;
+		case X_STV:
+			Assign();
+			break;
+		case X_CAL:
+			Call(POP(),code[PC++]);
+			break;
+		case X_LOC:
+			Loc();
+			break;
+		case X_RET:
+			Exit(code[PC]);
+			break;
+		case X_ALL:
+			Alloc();
+			break;
+		case X_FRE:
+			Free();
+			break;
+//\Here
+
+		default:
+			printf("Not implemented! %u\n",code[PC-1]);
+			return;
+		}
+	}
+}

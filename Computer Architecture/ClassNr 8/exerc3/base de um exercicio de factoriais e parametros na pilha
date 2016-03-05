@@ -1,0 +1,30 @@
+; AULA 8
+
+factorial
+factorial de c = m!/(n!*(m-n)!)
+
+;ebp+12=m
+;ebp+8=n
+
+
+comb:					;funcao
+	push ebp
+	mov ebp, esp
+	sub esp, 3*4			; forcar o stack point
+					;ebp-4 = m!
+					;ebp-8 = n!
+					;ebp-12 = (m-n)!
+					
+	push [ebp+12] 			; pass m to factorial 
+	call factorial 			; devolver o factorial no eax
+	add esp, 4 
+	mov [esp-4], eax		; save m!
+	;falta fazer o mesmo para o ebp-8 e ebp-12
+
+	mov eax,[ebp-12]
+	mul [ebp-8]
+	mov ebx,[ebp-4]
+	div ebx
+	add esp, 3*4			; tenho de voltar a por a pilha de volta
+	pop ebp
+
